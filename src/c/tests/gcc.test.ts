@@ -1,22 +1,11 @@
 // Compara el intérprete con gcc: misma salida y mismo código de salida.
-import { execFileSync, spawnSync } from 'node:child_process';
-import { mkdtempSync, readdirSync, readFileSync, existsSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { outputText, runC } from '../index';
+import { hasGcc, runGcc } from './gcc';
 
 const dir = join(__dirname, 'programs');
-const hasGcc = spawnSync('gcc', ['--version']).status === 0;
-
-export function runGcc(src: string, stdin: string): { out: string; code: number } {
-  const work = mkdtempSync(join(tmpdir(), 'cgc-'));
-  const file = join(work, 'p.c');
-  writeFileSync(file, src);
-  execFileSync('gcc', ['-w', '-O0', '-o', join(work, 'p'), file, '-lm']);
-  const r = spawnSync(join(work, 'p'), [], { input: stdin, cwd: work, timeout: 10000 });
-  return { out: r.stdout.toString('utf8'), code: r.status ?? -1 };
-}
 
 describe.skipIf(!hasGcc)('igual que gcc', () => {
   for (const f of readdirSync(dir).filter((x) => x.endsWith('.c')).sort()) {

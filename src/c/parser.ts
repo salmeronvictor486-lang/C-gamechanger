@@ -1168,11 +1168,12 @@ class Parser {
         }
         const isStatic = spec.storage === 'static';
         const sym = this.newVar(name, type, isStatic ? 'static' : 'local', d.pos);
+        // en C la variable ya existe dentro de su propio inicializador: int *v = malloc(sizeof *v);
+        this.scope.syms.set(name, sym);
         let init: Init | null = null;
         if (this.accept('=')) {
           if (vla.length) this.err(d.pos, 'Un array de tamaño variable no se puede inicializar con { }', 'Rellénalo con un bucle for después de declararlo.');
           if (isStatic) this.inGlobalInit = true;
-          // la variable ya existe dentro de su propio inicializador (int x = x; es un error de uso)
           try {
             const tree = this.initializer();
             const r = this.buildInit(type, tree, name);
@@ -1443,12 +1444,12 @@ class Parser {
   }
 
   /** Sentencia que es el cuerpo de un if/for/while: también puede ser una declaración suelta (error). */
-  private subStatement(owner: string, ownerTok: PTok): Stmt {
+  private subStatement(owner: string, ownerTok: PTok, condHasEffects = false): Stmt {
     const t = this.peek();
     if (this.isTypeStart() && this.isDeclarationAhead()) {
       this.err(t, `Para declarar una variable dentro de un ${owner} hacen falta llaves { }`, `Escribe: ${owner} (...) { ${t.v} ...; }`);
     }
-    if (t.t === 'p' && t.v === ';' && t.line === this.prev().line && owner !== 'else' && owner !== 'do') {
+    if (t.t === 'p' && t.v === ';' && t.line === this.prev().line && owner !== 'else' && owner !== 'do' && !condHasEffects) {
       this.warn(
         t,
         `Hay un ';' justo después del ${owner} (...)`,
@@ -1526,7 +1527,7 @@ class Parser {
           this.loops++;
           this.breakable++;
           try {
-            const body = this.subStatement('while', t);
+            const body = this.subStatement('while', t, hasEffects(c));
             return { s: 'while', c, body, ...pos };
           } finally {
             this.loops--;
@@ -1880,7 +1881,7 @@ class Parser {
           const pt = promote(x.type);
           const xx = this.castTo(x, pt);
           if (t.v === '+') return xx;
-          if (xx.e === 'const') return this.mkConst(arith('-', pt, pt.k === 'int' && pt.size === 8 ? 0n : 0, xx.v), pt, t);
+          if (xx.e === 'const') return this.mkConst(pt.k === 'float' ? -(xx.v as number) : arith('-', pt, pt.k === 'int' && pt.size === 8 ? 0n : 0, xx.v), pt, t);
           return this.mk({ e: 'neg', x: xx }, pt, t);
         }
         case '~': {
@@ -2945,6 +2946,42 @@ function substitute(t: CType, real: CType): CType {
       return { ...t, ret: substitute(t.ret, real) };
     default:
       return t;
+  }
+}
+
+/** ¿La expresión hace algo además de calcular? (llamadas, asignaciones, ++) */
+function hasEffects(x: Expr): boolean {
+  switch (x.e) {
+    case 'call':
+    case 'assign':
+    case 'opassign':
+    case 'incdec':
+      return true;
+    case 'arith':
+    case 'cmp':
+    case 'logic':
+    case 'pdiff':
+      return hasEffects(x.l) || hasEffects(x.r);
+    case 'cast':
+    case 'not':
+    case 'neg':
+    case 'bitnot':
+    case 'decay':
+    case 'deref':
+    case 'addr':
+      return hasEffects(x.x);
+    case 'index':
+      return hasEffects(x.a) || hasEffects(x.i);
+    case 'padd':
+      return hasEffects(x.p) || hasEffects(x.i);
+    case 'member':
+      return hasEffects(x.x);
+    case 'cond':
+      return hasEffects(x.c) || hasEffects(x.a) || hasEffects(x.b);
+    case 'comma':
+      return hasEffects(x.a) || hasEffects(x.b);
+    default:
+      return false;
   }
 }
 
