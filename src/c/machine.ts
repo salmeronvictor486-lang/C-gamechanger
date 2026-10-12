@@ -33,6 +33,8 @@ export interface RunOptions {
 
 export type RunResult = {
   output: Uint8Array;
+  /** Posición de la salida en la que se empezó a leer cada línea de la entrada. */
+  inputMarks: number[];
   stdinUsed: number;
   steps: number;
   files: Record<string, string>;
@@ -172,7 +174,8 @@ export class Machine {
   run(): RunResult {
     let res: RunResult;
     const base = () => ({
-      output: new Uint8Array(this.out),
+      output: (this.flushOutput(), new Uint8Array(this.out)),
+      inputMarks: this.inputMarks,
       stdinUsed: this.stdinPos,
       steps: this.steps,
       files: this.files,
@@ -214,7 +217,6 @@ export class Machine {
         };
       } else throw e;
     }
-    this.flushOutput();
     return res;
   }
 
@@ -248,6 +250,7 @@ export class Machine {
 
   private flushOutput(): void {
     if (this.onOutput && this.out.length) {
+      this.outTotal += this.out.length;
       this.onOutput(new Uint8Array(this.out));
       this.out = [];
     }
@@ -255,7 +258,7 @@ export class Machine {
 
   write(bytes: ArrayLike<number>): void {
     for (let i = 0; i < bytes.length; i++) this.out.push(bytes[i]);
-    if (this.out.length > 2_000_000) {
+    if (this.outTotal + this.out.length > 2_000_000) {
       throw new RuntimeError('El programa ha escrito demasiado texto', '¿Hay un bucle infinito con un printf dentro?');
     }
   }
@@ -1636,8 +1639,15 @@ export class Machine {
   }
 
   /** Lee un byte de la entrada estándar (-1 = fin). */
+  /** Para cada línea de la entrada, cuánta salida había cuando se empezó a leer. */
+  inputMarks: number[] = [];
+  private outTotal = 0;
+
   readByte(): number {
-    if (this.stdinPos < this.stdin.length) return this.stdin[this.stdinPos++];
+    if (this.stdinPos < this.stdin.length) {
+      if (this.stdinPos === 0 || this.stdin[this.stdinPos - 1] === 10) this.inputMarks.push(this.outTotal + this.out.length);
+      return this.stdin[this.stdinPos++];
+    }
     if (this.interactive) throw new NeedInput();
     return -1;
   }
