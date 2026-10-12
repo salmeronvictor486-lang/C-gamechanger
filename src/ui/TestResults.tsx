@@ -121,11 +121,15 @@ function Transcript({ segs, diffLine, raw }: { segs: Segment[]; diffLine: number
       return;
     }
     const lines = s.text.split('\n');
+    const lastSeg = si === segs.length - 1;
     lines.forEach((ln, li) => {
       const isDiff = outLine === diffLine;
+      // los espacios finales solo importan si la línea termina de verdad (no si después se teclea algo)
+      const complete = li < lines.length - 1 || lastSeg;
+      const plain = ln.replace(/ /g, '·').replace(/\t/g, '→   ') === ln || (!complete && !ln.includes('\t'));
       parts.push(
         <span key={`${si}-${li}`} className={isDiff ? 'diff-line' : ''}>
-          {ln.replace(/ /g, '·').replace(/\t/g, '→   ') === ln ? ln : <Visible text={ln} />}
+          {plain ? ln : <Visible text={ln} trailing={complete} />}
           {li < lines.length - 1 ? '\n' : ''}
         </span>,
       );
@@ -136,8 +140,8 @@ function Transcript({ segs, diffLine, raw }: { segs: Segment[]; diffLine: number
 }
 
 /** Muestra los espacios finales y tabuladores para que se vean las diferencias. */
-function Visible({ text }: { text: string }) {
-  const m = /^(.*?)([ \t]*)$/.exec(text)!;
+function Visible({ text, trailing }: { text: string; trailing: boolean }) {
+  const m = trailing ? /^(.*?)([ \t]*)$/.exec(text)! : ([text, text, ''] as unknown as RegExpExecArray);
   return (
     <>
       {m[1].split('\t').map((p, i, arr) => (
@@ -156,18 +160,20 @@ function DiffHint({ expected, got, line }: { expected: string; got: string; line
   const g = normalize(got).split('\n');
   let msg: string;
   if (line < 0) return null;
-  if (line >= g.length) msg = `A tu salida le faltan líneas: la línea ${line + 1} debería ser «${e[line]}».`;
-  else if (line >= e.length) msg = `Tu programa escribe líneas de más a partir de la ${line + 1}: «${g[line]}».`;
+  const q = (t: string) => `«${t.length > 40 ? t.slice(0, 40) + '…' : t}»`;
+  if (line >= g.length) msg = `A tu salida le faltan líneas: después debería venir ${q(e[line])}.`;
+  else if (line >= e.length) msg = `Tu programa escribe líneas de más: ${q(g[line])} no debería salir.`;
   else {
     const a = e[line];
     const b = g[line];
-    if (a.toLowerCase() === b.toLowerCase()) msg = `La línea ${line + 1} solo cambia en mayúsculas/minúsculas.`;
-    else if (a.replace(/\s+/g, '') === b.replace(/\s+/g, '')) msg = `La línea ${line + 1} solo cambia en los espacios. Revisa los espacios y tabuladores.`;
-    else if (b === '' && a !== '') msg = `En la línea ${line + 1} hay una línea vacía de más o falta texto. ¿Sobra o falta un \\n?`;
+    if (a.toLowerCase() === b.toLowerCase()) msg = `La línea ${q(b)} solo cambia en mayúsculas/minúsculas: se esperaba ${q(a)}.`;
+    else if (a.replace(/\s+/g, '') === b.replace(/\s+/g, '')) msg = `La línea ${q(b)} solo cambia en los espacios. Se esperaba ${q(a)}: revisa espacios y tabuladores.`;
+    else if (b === '' && a !== '') msg = `Hay una línea vacía donde se esperaba ${q(a)}. ¿Sobra un \\n?`;
+    else if (a === '' && b !== '') msg = `Se esperaba una línea vacía antes de ${q(b)}. ¿Falta un \\n?`;
     else {
       let k = 0;
       while (k < a.length && a[k] === b[k]) k++;
-      msg = `La línea ${line + 1} es distinta a partir del carácter ${k + 1}: se esperaba «${a.slice(k, k + 15) || '(fin de línea)'}» y aparece «${b.slice(k, k + 15) || '(fin de línea)'}».`;
+      msg = `En la línea ${q(b)}, a partir del carácter ${k + 1} se esperaba ${q(a.slice(k, k + 15) || '(fin de línea)')} y aparece ${q(b.slice(k, k + 15) || '(fin de línea)')}.`;
     }
   }
   return <div className="diff-hint">🔎 {msg}</div>;

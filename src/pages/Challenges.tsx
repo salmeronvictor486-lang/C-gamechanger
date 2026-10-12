@@ -10,7 +10,7 @@ const DIFF = { 1: '🟢 Fácil', 2: '🟡 Medio', 3: '🔴 Difícil' } as const;
 export function Challenges() {
   const p = useProgress();
   const [filter, setFilter] = useState<0 | 1 | 2 | 3>(0);
-  const list = RETOS.filter((r) => !filter || r.difficulty === filter);
+  const list = RETOS.filter((r) => !filter || r.difficulty === filter).sort((a, b) => (a.difficulty ?? 1) - (b.difficulty ?? 1));
   const done = RETOS.filter((r) => p.done[r.id]).length;
   return (
     <div className="page">

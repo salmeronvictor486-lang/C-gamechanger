@@ -235,10 +235,10 @@ export function Playground({ shared }: { shared?: string }) {
         <button className="btn-icon" onClick={download} title="Descargar como programa.c">
           ⬇ .c
         </button>
-        <button className="btn-icon" onClick={() => setFont(-1)}>
+        <button className="btn-icon font" onClick={() => setFont(-1)}>
           A−
         </button>
-        <button className="btn-icon" onClick={() => setFont(1)}>
+        <button className="btn-icon font" onClick={() => setFont(1)}>
           A+
         </button>
       </div>

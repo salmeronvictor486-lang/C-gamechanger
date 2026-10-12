@@ -433,7 +433,8 @@ button {
   font-weight: 700;
 }
 .dash-value {
-  font-family: var(--font-pixel);
+  font-family: var(--font-ui);
+  font-weight: 800;
   font-size: 1.3rem;
   margin: 0.15rem 0 0.4rem;
 }
@@ -555,9 +556,9 @@ button {
   font-weight: 700;
 }
 .chapter-title {
-  font-family: var(--font-pixel);
+  font-family: var(--font-ui);
+  font-weight: 800;
   font-size: 1.2rem;
-  font-weight: 700;
 }
 .chapter-sub {
   color: var(--muted);
@@ -700,6 +701,7 @@ button {
   margin: 0 auto;
   overflow: visible;
   height: auto;
+  border-right: none;
 }
 .lesson-left {
   overflow-y: auto;
@@ -1576,7 +1578,8 @@ pre.code {
   color: var(--green);
 }
 .reto-title {
-  font-family: var(--font-pixel);
+  font-family: var(--font-ui);
+  font-weight: 800;
   font-size: 1.15rem;
   margin: 0.3rem 0;
 }
@@ -1623,7 +1626,8 @@ pre.code {
   flex: 1;
 }
 .name-input {
-  font-family: var(--font-pixel);
+  font-family: var(--font-ui);
+  font-weight: 800;
   font-size: 1.8rem;
   background: transparent;
   border: none;
@@ -1837,6 +1841,9 @@ pre.code {
   }
   .stat.rank,
   .stat:first-child {
+    display: none;
+  }
+  .toolbar .btn-icon.font {
     display: none;
   }
   h1 {

@@ -34,7 +34,6 @@ export class InteractiveSession {
   private watchdog: ReturnType<typeof setTimeout> | null = null;
   private currentId = 0;
   private finished = false;
-  private startedAt = 0;
 
   constructor(
     private src: string,
@@ -43,7 +42,6 @@ export class InteractiveSession {
   ) {}
 
   start(): void {
-    this.startedAt = performance.now();
     this.launch();
   }
 
@@ -127,7 +125,7 @@ export class InteractiveSession {
       this.events.onNeedInput();
       return;
     }
-    this.finish({ ...done, ms: performance.now() - this.startedAt });
+    this.finish(done);
   }
 
   private finish(done: RunDone): void {

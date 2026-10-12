@@ -114,6 +114,7 @@ export function RunStatusView({ done, onGoToLine }: { done: RunDone; onGoToLine?
         <div className={`run-status ${s.code === 0 ? 'ok' : 'warn'}`}>
           {s.code === 0 ? '✔ El programa terminó bien' : `El programa terminó con código ${s.code}`}
           <span className="muted"> · {formatMs(done.ms)}</span>
+          <WarningsList warnings={done.warnings} onGoToLine={onGoToLine} />
           {done.leaks.count > 0 && (
             <div className="run-leak">
               🧹 Quedaron {done.leaks.count} bloque{done.leaks.count === 1 ? '' : 's'} de memoria sin liberar ({done.leaks.bytes} bytes). Usa free() con todo lo que reserves.
@@ -128,6 +129,7 @@ export function RunStatusView({ done, onGoToLine }: { done: RunDone; onGoToLine?
           {s.stack.length > 1 && <span className="muted"> (dentro de {s.stack[0]})</span>}
           <div className="err-msg">{s.message}</div>
           {s.hint && <div className="err-hint">💡 {s.hint}</div>}
+          <WarningsList warnings={done.warnings} onGoToLine={onGoToLine} />
         </div>
       );
     case 'limit':

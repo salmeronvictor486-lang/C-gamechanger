@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { findChapter, findLesson } from '../content';
 import { rankOf } from '../game/game';
 import { ChapterPage } from '../pages/ChapterPage';
 import { Home } from '../pages/Home';
@@ -23,7 +24,16 @@ export function App() {
 
   useEffect(() => {
     if (route.page !== 'lesson') window.scrollTo(0, 0);
-  }, [hash, route.page]);
+    const base = 'C Gamechanger';
+    let t = 'Aprende C jugando';
+    if (route.page === 'lesson') t = findLesson(route.id)?.lesson.title ?? t;
+    else if (route.page === 'chapter') t = findChapter(route.id)?.title ?? t;
+    else if (route.page === 'playground') t = 'Práctica';
+    else if (route.page === 'retos') t = 'Retos';
+    else if (route.page === 'chuleta') t = 'Chuleta';
+    else if (route.page === 'perfil') t = 'Tu perfil';
+    document.title = `${t} · ${base}`;
+  }, [hash, route]);
 
   const { rank } = rankOf(p.xp);
   const streak = currentStreak(p);

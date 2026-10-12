@@ -385,10 +385,10 @@ function LessonView({ lesson }: { lesson: Lesson }) {
               ✔ Comprobar
             </button>
             <span className="spacer" />
-            <button className="btn-icon" onClick={() => setFont(-1)} title="Letra más pequeña">
+            <button className="btn-icon font" onClick={() => setFont(-1)} title="Letra más pequeña">
               A−
             </button>
-            <button className="btn-icon" onClick={() => setFont(1)} title="Letra más grande">
+            <button className="btn-icon font" onClick={() => setFont(1)} title="Letra más grande">
               A+
             </button>
             <button className="btn-icon" onClick={reset} title="Volver al código inicial">
