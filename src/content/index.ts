@@ -15,12 +15,13 @@ import { punteros } from './chapters/13-punteros';
 import { structs } from './chapters/14-structs';
 import { memoria } from './chapters/15-memoria';
 import { ficheros } from './chapters/16-ficheros';
+import { retos } from './retos';
 import type { Chapter, Lesson } from './types';
 
 export const CHAPTERS: Chapter[] = [hola, variables, operadores, entrada, condicionales, bucleWhile, doWhile, bucleFor, arrays, matrices, cadenas, funciones, punteros, structs, memoria, ficheros];
 
 /** Retos extra, fuera del camino principal. */
-export const RETOS: Lesson[] = [];
+export const RETOS: Lesson[] = retos;
 
 export interface LessonRef {
   chapter: Chapter | null;
