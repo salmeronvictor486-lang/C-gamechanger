@@ -1168,11 +1168,12 @@ class Parser {
         }
         const isStatic = spec.storage === 'static';
         const sym = this.newVar(name, type, isStatic ? 'static' : 'local', d.pos);
+        // en C la variable ya existe dentro de su propio inicializador: int *v = malloc(sizeof *v);
+        this.scope.syms.set(name, sym);
         let init: Init | null = null;
         if (this.accept('=')) {
           if (vla.length) this.err(d.pos, 'Un array de tamaño variable no se puede inicializar con { }', 'Rellénalo con un bucle for después de declararlo.');
           if (isStatic) this.inGlobalInit = true;
-          // la variable ya existe dentro de su propio inicializador (int x = x; es un error de uso)
           try {
             const tree = this.initializer();
             const r = this.buildInit(type, tree, name);
@@ -1880,7 +1881,7 @@ class Parser {
           const pt = promote(x.type);
           const xx = this.castTo(x, pt);
           if (t.v === '+') return xx;
-          if (xx.e === 'const') return this.mkConst(arith('-', pt, pt.k === 'int' && pt.size === 8 ? 0n : 0, xx.v), pt, t);
+          if (xx.e === 'const') return this.mkConst(pt.k === 'float' ? -(xx.v as number) : arith('-', pt, pt.k === 'int' && pt.size === 8 ? 0n : 0, xx.v), pt, t);
           return this.mk({ e: 'neg', x: xx }, pt, t);
         }
         case '~': {
