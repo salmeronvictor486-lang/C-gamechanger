@@ -1,8 +1,12 @@
 // Índice del temario.
 import { hola } from './chapters/01-hola';
+import { variables } from './chapters/02-variables';
+import { operadores } from './chapters/03-operadores';
+import { entrada } from './chapters/04-entrada';
+import { condicionales } from './chapters/05-condicionales';
 import type { Chapter, Lesson } from './types';
 
-export const CHAPTERS: Chapter[] = [hola];
+export const CHAPTERS: Chapter[] = [hola, variables, operadores, entrada, condicionales];
 
 /** Retos extra, fuera del camino principal. */
 export const RETOS: Lesson[] = [];

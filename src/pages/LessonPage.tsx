@@ -4,7 +4,7 @@ import { compile } from '../c/parser';
 import { findLesson, nextLesson, prevLesson } from '../content';
 import { lessonXp, type Exercise, type Lesson } from '../content/types';
 import { BADGES, type Badge } from '../game/game';
-import { failedRequirements, sameOutput } from '../runner/check';
+import { failedRequirements, sameOutput, transcript } from '../runner/check';
 import { createWorker, runOnce, type BatchResult } from '../runner/runner';
 import { CHAPTERS } from '../content';
 import { getProgress, setCode, touchStreak, update, useProgress } from '../state/progress';
@@ -17,6 +17,44 @@ import { Quiz } from '../ui/Quiz';
 import { TestResults, type CheckState, type TestRun } from '../ui/TestResults';
 import { useRunner } from '../ui/useRunner';
 import { highlightC } from '../ui/highlight';
+
+/** Ejemplos de ejecución sacados de la solución (así nunca están mal). */
+function Examples({ lesson, ex }: { lesson: Lesson; ex: Exercise }) {
+  const [runs, setRuns] = useState<BatchResult[] | null>(null);
+  const n = ex.examples ?? (ex.tests.some((t) => t.input) ? 1 : 0);
+  useEffect(() => {
+    let alive = true;
+    if (n > 0) void solutionRuns(lesson, ex).then((r) => alive && setRuns(r));
+    return () => {
+      alive = false;
+    };
+  }, [lesson, ex, n]);
+  if (n === 0) return null;
+  const shown = ex.tests
+    .map((t, i) => ({ t, i }))
+    .filter(({ t }) => !t.hidden)
+    .slice(0, n);
+  return (
+    <div className="examples">
+      {shown.map(({ t, i }) => (
+        <div key={i} className="example">
+          <div className="example-label">{shown.length > 1 ? `Ejemplo ${shown.indexOf(shown.find((x) => x.i === i)!) + 1}` : 'Ejemplo'}{t.input ? ' (lo verde es lo que escribe el usuario)' : ''}</div>
+          {runs ? (
+            <pre className="transcript">
+              {transcript(runs[i].output, t.input ?? '', runs[i].done.inputMarks).map((sg, k) => (
+                <span key={k} className={sg.kind === 'in' ? 'console-in' : ''}>
+                  {sg.text}
+                </span>
+              ))}
+            </pre>
+          ) : (
+            <pre className="transcript empty">…</pre>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
 
 const KIND_LABEL: Record<string, string> = { proyecto: '🏗️ Proyecto', examen: '📝 Examen', reto: '🏆 Reto' };
 
@@ -255,6 +293,7 @@ function LessonView({ lesson }: { lesson: Lesson }) {
           <div className="task-card">
             <h2>🎯 Tu misión</h2>
             <Markdown text={ex.task} />
+            <Examples lesson={lesson} ex={ex} />
             <div className="task-actions">
               <button className="btn primary mobile-only" onClick={() => setTab('codigo')}>
                 ✎ Ir al código

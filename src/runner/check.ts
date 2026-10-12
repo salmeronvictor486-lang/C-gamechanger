@@ -38,7 +38,7 @@ export function transcript(output: string, input: string, marks: number[]): Segm
   return segs;
 }
 
-/** Código sin comentarios ni textos entre comillas (para buscar palabras clave). */
+/** Código sin comentarios (para buscar palabras clave y formatos). */
 export function stripCode(src: string): string {
   let out = '';
   let i = 0;
@@ -57,13 +57,14 @@ export function stripCode(src: string): string {
     }
     if (c === '"' || c === "'") {
       const q = c;
-      out += q + q;
+      const start = i;
       i++;
       while (i < src.length && src[i] !== q && src[i] !== '\n') {
         if (src[i] === '\\') i++;
         i++;
       }
       i++;
+      out += src.slice(start, i);
       continue;
     }
     out += c;

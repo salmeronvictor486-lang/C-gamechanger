@@ -13,7 +13,7 @@ export interface ExerciseTest {
 }
 
 export interface CodeRule {
-  /** Expresión regular sobre el código sin comentarios ni textos. */
+  /** Expresión regular sobre el código sin comentarios. */
   re: string;
   msg: string;
 }
@@ -27,6 +27,8 @@ export interface Exercise {
   hints: string[];
   requires?: CodeRule[];
   forbids?: CodeRule[];
+  /** Cuántas pruebas se enseñan como ejemplo de ejecución (por defecto 1; 0 = ninguna). */
+  examples?: number;
 }
 
 export interface QuizQuestion {
@@ -80,4 +82,12 @@ export function lessonXp(l: Lesson): number {
     default:
       return l.exercise ? 20 : 10;
   }
+}
+
+/**
+ * Plantilla para escribir el temario: las barras invertidas se quedan tal cual
+ * (\n se escribe \n) y \` se convierte en una comilla invertida.
+ */
+export function md(s: TemplateStringsArray, ...v: unknown[]): string {
+  return String.raw(s, ...v).replace(/\\`/g, '`');
 }
