@@ -4,9 +4,12 @@ import { variables } from './chapters/02-variables';
 import { operadores } from './chapters/03-operadores';
 import { entrada } from './chapters/04-entrada';
 import { condicionales } from './chapters/05-condicionales';
+import { bucleWhile } from './chapters/06-while';
+import { doWhile } from './chapters/07-dowhile';
+import { bucleFor } from './chapters/08-for';
 import type { Chapter, Lesson } from './types';
 
-export const CHAPTERS: Chapter[] = [hola, variables, operadores, entrada, condicionales];
+export const CHAPTERS: Chapter[] = [hola, variables, operadores, entrada, condicionales, bucleWhile, doWhile, bucleFor];
 
 /** Retos extra, fuera del camino principal. */
 export const RETOS: Lesson[] = [];

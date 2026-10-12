@@ -71,6 +71,7 @@ describe('ejemplos de la teoría', () => {
     if (!r.compiled.ok) throw new Error(`no compila: ${r.compiled.error.message} (línea ${r.compiled.error.line})\n${code}`);
     const run = r.run!;
     if (run.status !== 'exit') throw new Error(`falla: ${JSON.stringify(run.status === 'error' ? run.message : run.status)}\n${code}`);
-    if (hasGcc) expect(outputText(run)).toBe(runGcc(code, input ? input + '\n' : '').out);
+    // con la hora real (time) cada ejecución es distinta: no se compara
+    if (hasGcc && !/\btime\s*\(/.test(code)) expect(outputText(run)).toBe(runGcc(code, input ? input + '\n' : '').out);
   });
 });
