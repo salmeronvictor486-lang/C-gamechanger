@@ -10,9 +10,12 @@ import { bucleFor } from './chapters/08-for';
 import { arrays } from './chapters/09-arrays';
 import { matrices } from './chapters/10-matrices';
 import { cadenas } from './chapters/11-cadenas';
+import { funciones } from './chapters/12-funciones';
+import { punteros } from './chapters/13-punteros';
+import { structs } from './chapters/14-structs';
 import type { Chapter, Lesson } from './types';
 
-export const CHAPTERS: Chapter[] = [hola, variables, operadores, entrada, condicionales, bucleWhile, doWhile, bucleFor, arrays, matrices, cadenas];
+export const CHAPTERS: Chapter[] = [hola, variables, operadores, entrada, condicionales, bucleWhile, doWhile, bucleFor, arrays, matrices, cadenas, funciones, punteros, structs];
 
 /** Retos extra, fuera del camino principal. */
 export const RETOS: Lesson[] = [];
