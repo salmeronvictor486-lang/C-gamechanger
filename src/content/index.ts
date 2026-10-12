@@ -13,9 +13,11 @@ import { cadenas } from './chapters/11-cadenas';
 import { funciones } from './chapters/12-funciones';
 import { punteros } from './chapters/13-punteros';
 import { structs } from './chapters/14-structs';
+import { memoria } from './chapters/15-memoria';
+import { ficheros } from './chapters/16-ficheros';
 import type { Chapter, Lesson } from './types';
 
-export const CHAPTERS: Chapter[] = [hola, variables, operadores, entrada, condicionales, bucleWhile, doWhile, bucleFor, arrays, matrices, cadenas, funciones, punteros, structs];
+export const CHAPTERS: Chapter[] = [hola, variables, operadores, entrada, condicionales, bucleWhile, doWhile, bucleFor, arrays, matrices, cadenas, funciones, punteros, structs, memoria, ficheros];
 
 /** Retos extra, fuera del camino principal. */
 export const RETOS: Lesson[] = [];
