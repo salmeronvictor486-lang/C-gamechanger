@@ -1443,12 +1443,12 @@ class Parser {
   }
 
   /** Sentencia que es el cuerpo de un if/for/while: también puede ser una declaración suelta (error). */
-  private subStatement(owner: string, ownerTok: PTok): Stmt {
+  private subStatement(owner: string, ownerTok: PTok, condHasEffects = false): Stmt {
     const t = this.peek();
     if (this.isTypeStart() && this.isDeclarationAhead()) {
       this.err(t, `Para declarar una variable dentro de un ${owner} hacen falta llaves { }`, `Escribe: ${owner} (...) { ${t.v} ...; }`);
     }
-    if (t.t === 'p' && t.v === ';' && t.line === this.prev().line && owner !== 'else' && owner !== 'do') {
+    if (t.t === 'p' && t.v === ';' && t.line === this.prev().line && owner !== 'else' && owner !== 'do' && !condHasEffects) {
       this.warn(
         t,
         `Hay un ';' justo después del ${owner} (...)`,
@@ -1526,7 +1526,7 @@ class Parser {
           this.loops++;
           this.breakable++;
           try {
-            const body = this.subStatement('while', t);
+            const body = this.subStatement('while', t, hasEffects(c));
             return { s: 'while', c, body, ...pos };
           } finally {
             this.loops--;
@@ -2945,6 +2945,42 @@ function substitute(t: CType, real: CType): CType {
       return { ...t, ret: substitute(t.ret, real) };
     default:
       return t;
+  }
+}
+
+/** ¿La expresión hace algo además de calcular? (llamadas, asignaciones, ++) */
+function hasEffects(x: Expr): boolean {
+  switch (x.e) {
+    case 'call':
+    case 'assign':
+    case 'opassign':
+    case 'incdec':
+      return true;
+    case 'arith':
+    case 'cmp':
+    case 'logic':
+    case 'pdiff':
+      return hasEffects(x.l) || hasEffects(x.r);
+    case 'cast':
+    case 'not':
+    case 'neg':
+    case 'bitnot':
+    case 'decay':
+    case 'deref':
+    case 'addr':
+      return hasEffects(x.x);
+    case 'index':
+      return hasEffects(x.a) || hasEffects(x.i);
+    case 'padd':
+      return hasEffects(x.p) || hasEffects(x.i);
+    case 'member':
+      return hasEffects(x.x);
+    case 'cond':
+      return hasEffects(x.c) || hasEffects(x.a) || hasEffects(x.b);
+    case 'comma':
+      return hasEffects(x.a) || hasEffects(x.b);
+    default:
+      return false;
   }
 }
 

@@ -7,9 +7,12 @@ import { condicionales } from './chapters/05-condicionales';
 import { bucleWhile } from './chapters/06-while';
 import { doWhile } from './chapters/07-dowhile';
 import { bucleFor } from './chapters/08-for';
+import { arrays } from './chapters/09-arrays';
+import { matrices } from './chapters/10-matrices';
+import { cadenas } from './chapters/11-cadenas';
 import type { Chapter, Lesson } from './types';
 
-export const CHAPTERS: Chapter[] = [hola, variables, operadores, entrada, condicionales, bucleWhile, doWhile, bucleFor];
+export const CHAPTERS: Chapter[] = [hola, variables, operadores, entrada, condicionales, bucleWhile, doWhile, bucleFor, arrays, matrices, cadenas];
 
 /** Retos extra, fuera del camino principal. */
 export const RETOS: Lesson[] = [];
